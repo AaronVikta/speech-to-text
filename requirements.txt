@@ -1,0 +1,4 @@
+faster-whisper
+av>=16,<17
+python-docx
+PySide6
