@@ -26,7 +26,7 @@ def transcribe(audio_path, model_name="small", language=None, on_status=None, on
     on_progress = on_progress or (lambda _pct: None)
     is_cancelled = is_cancelled or (lambda: False)
 
-    on_status(f"Loading '{model_name}' model (first use downloads it)...")
+    on_status("Preparing speech model (the first time, this downloads a few hundred MB, please wait)...")
     model = WhisperModel(model_name, device="cpu", compute_type="int8")
 
     on_status("Transcribing...")

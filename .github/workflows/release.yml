@@ -1,0 +1,83 @@
+name: Build downloads
+
+# Push a tag like v1.0.0 to build all three platforms and publish a GitHub Release.
+# Run manually from the Actions tab to just get the build artifacts.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04      # older glibc so the AppImage runs on more distros
+            name: linux
+          - os: windows-latest
+            name: windows
+          - os: macos-14          # Apple Silicon
+            name: macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+      - name: Install Qt runtime libraries (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libxkbcommon-x11-0 libxcb-cursor0 libfuse2
+      - name: Make icons
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python packaging/make_icons.py
+      - name: Build app with PyInstaller
+        run: pyinstaller --noconfirm packaging/app.spec
+
+      - name: Package AppImage (Linux)
+        if: runner.os == 'Linux'
+        run: packaging/build_appimage.sh
+      - name: Package installer (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
+        run: |
+          choco install innosetup -y --no-progress
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" packaging\installer.iss
+      - name: Package DMG (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p build/dmg
+          cp -R "dist/Recording to Word.app" build/dmg/
+          ln -s /Applications build/dmg/Applications
+          hdiutil create -volname "Recording to Word" -srcfolder build/dmg -ov -format UDZO "dist/RecordingToWord-macOS.dmg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RecordingToWord-${{ matrix.name }}
+          path: |
+            dist/*.AppImage
+            dist/*-Setup.exe
+            dist/*.dmg
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          generate_release_notes: true
