@@ -17,7 +17,7 @@ jobs:
             name: linux
           - os: windows-latest
             name: windows
-          - os: macos-14          # Apple Silicon
+          - os: macos-latest      # Apple Silicon
             name: macos
     runs-on: ${{ matrix.os }}
     steps:
@@ -56,7 +56,7 @@ jobs:
           mkdir -p build/dmg
           cp -R "dist/Recording to Word.app" build/dmg/
           ln -s /Applications build/dmg/Applications
-          hdiutil create -volname "Recording to Word" -srcfolder build/dmg -ov -format UDZO "dist/RecordingToWord-macOS.dmg"
+          hdiutil create -volname "Recording to Word" -srcfolder build/dmg -ov -format UDZO "dist/RecordingToWord-Mac.dmg"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -67,7 +67,8 @@ jobs:
             dist/*.dmg
 
   release:
-    if: github.ref_type == 'tag'
+    # Publish even if one platform failed, so the others are still downloadable.
+    if: always() && github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -77,7 +78,12 @@ jobs:
         with:
           path: out
           merge-multiple: true
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: packaging/release-notes.md
       - uses: softprops/action-gh-release@v2
         with:
           files: out/*
+          body_path: packaging/release-notes.md
           generate_release_notes: true
+          make_latest: true

@@ -5,13 +5,13 @@ It uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) and runs ful
 
 ## Download (no setup needed)
 
-Go to the [latest release](https://github.com/AaronVikta/speech-to-text/releases/latest) and download the file for your computer:
+Go to the [latest release](https://github.com/AaronVikta/speech-to-text/releases/latest) and download the file for your computer (ignore the "Source code" zips, they are for developers):
 
 | Computer | File | How to open |
 |---|---|---|
-| Windows | `RecordingToWord-Setup.exe` | Double-click it and follow the installer. If Windows shows "Windows protected your PC", click **More info** → **Run anyway**. |
-| Mac | `RecordingToWord-macOS.dmg` | Open it and drag **Recording to Word** into Applications. The first time, right-click the app → **Open** → **Open**. |
-| Linux | `RecordingToWord-x86_64.AppImage` | Right-click → Properties → allow running as a program, then double-click it. |
+| Windows | `RecordingToWord-Windows-Setup.exe` | Double-click it and follow the installer. If Windows shows "Windows protected your PC", click **More info** → **Run anyway**. |
+| Mac | `RecordingToWord-Mac.dmg` | Open it and drag **Recording to Word** into Applications. The first time, right-click the app → **Open** → **Open**. |
+| Linux | `RecordingToWord-Linux.AppImage` | Right-click → Properties → allow running as a program, then double-click it. |
 
 Then drop your recording onto the window, click **Generate Word document** and choose where to save it.
 The first transcription downloads the speech model (a few hundred MB), so you need an internet connection that one time.
@@ -68,7 +68,7 @@ To build locally (for your current OS only):
 .venv/bin/python -m pip install pyinstaller
 QT_QPA_PLATFORM=offscreen .venv/bin/python packaging/make_icons.py
 .venv/bin/pyinstaller --noconfirm packaging/app.spec    # app folder in dist/RecordingToWord
-packaging/build_appimage.sh                              # Linux only: dist/RecordingToWord-x86_64.AppImage
+packaging/build_appimage.sh                              # Linux only: dist/RecordingToWord-Linux.AppImage
 ```
 
 ## Files

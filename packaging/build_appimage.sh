@@ -23,4 +23,4 @@ RUN
 chmod +x "$APPDIR/AppRun"
 TOOL=build/appimagetool
 [ -x "$TOOL" ] || { curl -fsSL -o "$TOOL" https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage; chmod +x "$TOOL"; }
-ARCH=x86_64 "$TOOL" --appimage-extract-and-run "$APPDIR" dist/RecordingToWord-x86_64.AppImage
+ARCH=x86_64 "$TOOL" --appimage-extract-and-run "$APPDIR" dist/RecordingToWord-Linux.AppImage
