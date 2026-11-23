@@ -74,16 +74,19 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Checkout must come first: it wipes the workspace, which would delete the downloaded builds.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: packaging/release-notes.md
       - uses: actions/download-artifact@v4
         with:
           path: out
           merge-multiple: true
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: packaging/release-notes.md
+      - run: ls -la out
       - uses: softprops/action-gh-release@v2
         with:
           files: out/*
+          fail_on_unmatched_files: true
           body_path: packaging/release-notes.md
           generate_release_notes: true
           make_latest: true
